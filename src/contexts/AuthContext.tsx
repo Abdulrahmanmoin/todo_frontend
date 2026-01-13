@@ -143,14 +143,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('authToken', token);
         // Refresh user data after successful registration
         await refreshUser();
-      } else if (response && (response.user_id || (response as any).id)) {
-        // If registration succeeded but didn't return a token, 
-        // we might need the user to login or we try to login for them
-        // For now, let's just attempt a refresh which might fail but we've registered
-        console.log('Registration successful, fetching user data...');
-        await refreshUser();
       } else {
-        throw new Error('Registration failed - unexpected response format');
+        throw new Error('Registration failed - no token returned');
       }
     } catch (err) {
       console.error('Registration error:', err);

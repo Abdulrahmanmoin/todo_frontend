@@ -63,24 +63,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Try to get the session from Better Auth first
       const betterAuthSession = await getSession();
 
-      if (betterAuthSession?.user) {
-        // If Better Auth session exists, use it
-        const convertedUser = convertBetterAuthUserToUser(betterAuthSession.user);
-        setUser(convertedUser);
-        setSession(betterAuthSession);
-        setIsAuthenticated(true);
-      } else {
-        // If Better Auth session doesn't exist, try to get user from API
-        try {
-          const apiUser = await api.user.getCurrentUser();
-          setUser(apiUser);
+      // Better Auth returns a response that may have data or error properties
+      // We need to check if it's a successful response with user data
+      if (betterAuthSession && typeof betterAuthSession === 'object') {
+        // Type assertion to handle Better Auth's response type
+        const sessionData = betterAuthSession as any;
+
+        // Check for user in the response (could be direct or nested in data)
+        const user = sessionData.user || sessionData.data?.user;
+
+        if (user) {
+          // If Better Auth session exists, use it
+          const convertedUser = convertBetterAuthUserToUser(user);
+          setUser(convertedUser);
+          setSession(sessionData as BetterAuthSession);
           setIsAuthenticated(true);
-        } catch (apiError) {
-          // If API call fails, user is not authenticated
-          setUser(null);
-          setSession(null);
-          setIsAuthenticated(false);
+        } else {
+          // If Better Auth session doesn't exist, try to get user from API
+          try {
+            const apiUser = await api.user.getCurrentUser();
+            setUser(apiUser);
+            setIsAuthenticated(true);
+          } catch (apiError) {
+            // If API call fails, user is not authenticated
+            setUser(null);
+            setSession(null);
+            setIsAuthenticated(false);
+          }
         }
+      } else {
+        // No session data, user is not authenticated
+        setUser(null);
+        setSession(null);
+        setIsAuthenticated(false);
       }
     } catch (err) {
       console.error('Error refreshing user:', err);
@@ -106,22 +121,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         rememberMe: true,
         // callbackURL is used for redirect after login
         callbackURL: credentials.callbackURL || '/dashboard',
-      });
+      }) as any;
 
-      if (loginResult?.session) {
+      // Check if login was successful
+      if (loginResult && !loginResult.error) {
         // Refresh user data after successful login
         await refreshUser();
       } else if (loginResult?.error) {
         // Handle specific error cases from Better Auth
-        if (loginResult.error.message?.includes('Invalid credentials')) {
+        const errorMsg = loginResult.error.message || loginResult.error.toString();
+        if (errorMsg.includes('Invalid credentials') || errorMsg.includes('invalid')) {
           throw new Error('Invalid email or password');
-        } else if (loginResult.error.message?.includes('Too many requests')) {
+        } else if (errorMsg.includes('Too many requests')) {
           throw new Error('Too many login attempts. Please try again later.');
         } else {
-          throw new Error(loginResult.error.message || 'Login failed');
+          throw new Error(errorMsg || 'Login failed');
         }
       } else {
-        throw new Error('Login failed - no session returned');
+        throw new Error('Login failed - no response returned');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -143,23 +160,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const registerResult = await betterAuthSignUp.email({
         email: userData.email,
         password: userData.password,
-        name: userData.name,
-      });
+        name: userData.name || userData.email.split('@')[0], // Use email prefix as default name
+      }) as any;
 
-      if (registerResult?.session) {
+      // Check if registration was successful
+      if (registerResult && !registerResult.error) {
         // Refresh user data after successful registration
         await refreshUser();
       } else if (registerResult?.error) {
         // Handle specific error cases from Better Auth
-        if (registerResult.error.message?.includes('User already exists')) {
+        const errorMsg = registerResult.error.message || registerResult.error.toString();
+        if (errorMsg.includes('User already exists') || errorMsg.includes('already')) {
           throw new Error('A user with this email already exists');
-        } else if (registerResult.error.message?.includes('Too many requests')) {
+        } else if (errorMsg.includes('Too many requests')) {
           throw new Error('Too many registration attempts. Please try again later.');
         } else {
-          throw new Error(registerResult.error.message || 'Registration failed');
+          throw new Error(errorMsg || 'Registration failed');
         }
       } else {
-        throw new Error('Registration failed - no session returned');
+        throw new Error('Registration failed - no response returned');
       }
     } catch (err) {
       console.error('Registration error:', err);

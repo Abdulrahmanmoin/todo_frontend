@@ -41,10 +41,8 @@ export const {
   useSession,
   getSession,
   updateUser,
-  forgotPassword,
   resetPassword,
   changePassword,
-  updateEmail,
   verifyEmail,
   sendVerificationEmail,
 } = authClient;
@@ -55,7 +53,7 @@ export interface User {
   email: string;
   emailVerified: boolean;
   name?: string;
-  image?: string;
+  image?: string | null;
   createdAt: string;
   updatedAt: string;
   // Additional fields can be added based on your server configuration
@@ -98,36 +96,41 @@ export interface RegisterData {
 
 // Additional utility functions that complement Better Auth
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
-  const session = await getSession();
-  if (session?.session) {
+  const sessionResponse = await getSession() as any;
+  const sessionData = sessionResponse?.data || sessionResponse;
+
+  if (sessionData?.session) {
     return {
-      Authorization: `Bearer ${session.session.id}`, // Using session ID as token
+      Authorization: `Bearer ${sessionData.session.id}`, // Using session ID as token
     };
   }
   return {};
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {
-  const session = await getSession();
-  return session?.user || null;
+  const sessionResponse = await getSession() as any;
+  const sessionData = sessionResponse?.data || sessionResponse;
+  return sessionData?.user || null;
 };
 
 export const isAuthenticated = async (): Promise<boolean> => {
-  const session = await getSession();
-  return !!session?.user;
+  const sessionResponse = await getSession() as any;
+  const sessionData = sessionResponse?.data || sessionResponse;
+  return !!sessionData?.user;
 };
 
 // Convenience function to get complete auth state
 export const getAuthState = async (): Promise<AuthState> => {
   try {
-    const session = await getSession();
+    const sessionResponse = await getSession() as any;
+    const sessionData = sessionResponse?.data || sessionResponse;
     const isLoading = false; // Better Auth handles loading states in the hook
     const error = null;
 
     return {
-      user: session?.user || null,
-      session: session || null,
-      isAuthenticated: !!session?.user,
+      user: sessionData?.user || null,
+      session: sessionData as Session || null,
+      isAuthenticated: !!sessionData?.user,
       isLoading,
       error,
     };

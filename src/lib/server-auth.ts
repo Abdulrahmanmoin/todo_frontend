@@ -60,13 +60,8 @@ export const auth = betterAuth({
 });
 
 // Export auth middleware for Next.js
-export const {
-  authHandler,
-  signIn,
-  signUp,
-  signOut,
-  getSession
-} = auth;
+export const authHandler = auth.handler;
+export const getSession = auth.api.getSession;
 
 // Export cookies helper
 export const cookies = nextCookies();
