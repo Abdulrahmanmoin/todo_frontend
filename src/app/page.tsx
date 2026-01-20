@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.push('/tasks');
+        router.push('/chat'); // Redirect to chat page instead of tasks
       } else {
         router.push('/login');
       }

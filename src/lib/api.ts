@@ -3,7 +3,7 @@ import { User, CreateUserRequest, LoginRequest, LoginResponse as UserLoginRespon
 import { ApiResponse, ListParams } from '../types/api';
 
 // Base API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860';
 
 export class ApiError extends Error {
   public status: number;
