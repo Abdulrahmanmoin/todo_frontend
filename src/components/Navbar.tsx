@@ -4,7 +4,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/Dropdown-menu';
@@ -13,6 +13,7 @@ import { Moon, Sun, Menu } from 'lucide-react';
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
 
   if (isLoading) {
     return (
@@ -47,12 +48,26 @@ const Navbar: React.FC = () => {
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {isAuthenticated && (
-                <Link
-                  href="/tasks"
-                  className="inline-flex items-center px-1 pt-1 border-b-2 border-blue-500 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Tasks
-                </Link>
+                <>
+                  <Link
+                    href="/tasks"
+                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${pathname === '/tasks'
+                        ? 'border-blue-500 text-gray-900 dark:text-white'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-white'
+                      }`}
+                  >
+                    Tasks
+                  </Link>
+                  <Link
+                    href="/chat"
+                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${pathname === '/chat'
+                        ? 'border-blue-500 text-gray-900 dark:text-white'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-white'
+                      }`}
+                  >
+                    Chat
+                  </Link>
+                </>
               )}
             </div>
           </div>
@@ -121,7 +136,10 @@ const Navbar: React.FC = () => {
                 {isAuthenticated ? (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link href="/tasks">Tasks</Link>
+                      <Link href="/tasks" className={pathname === '/tasks' ? 'font-bold text-blue-600' : ''}>Tasks</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/chat" className={pathname === '/chat' ? 'font-bold text-blue-600' : ''}>Chat</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/logout">Logout</Link>
