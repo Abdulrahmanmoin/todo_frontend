@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ScrollArea } from '@/components/ui/ScrollArea';
-import { ChatKitProvider, ChatView } from '@openai/chatkit-react';
 import { Send as SendIcon, Bot as BotIcon, User as UserIcon, Plus as PlusIcon, MessageSquare as MessageSquareIcon } from 'lucide-react';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -95,7 +94,7 @@ const ChatPage = () => {
     if (!user?.user_id || !localStorage.getItem('authToken')) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${user.user_id}/conversations/${convId}/messages`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860'}/api/${user.user_id}/conversations/${convId}/messages`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         },

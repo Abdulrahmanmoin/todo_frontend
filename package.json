@@ -21,7 +21,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.4.0",
-    "@openai/chatkit-react": "^1.4.1",
     "@radix-ui/react-scroll-area": "^1.1.0"
   },
   "devDependencies": {
